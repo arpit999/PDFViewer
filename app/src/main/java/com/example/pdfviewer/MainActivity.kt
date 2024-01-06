@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.net.toUri
 import com.example.pdfviewer.ui.theme.PDFViewerTheme
 import com.example.pdfviewer.utility.Utility
 
@@ -27,9 +26,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val path = Utility.getFileFromAssets(context,"sample.pdf")
+                    val file = Utility.getFileFromAssets(context,"sample.pdf")
 //                    PdfViewer(uri = Uri.parse("https://www.africau.edu/images/default/sample.pdf"))
-                    PdfViewer(uri = path.toUri())
+                    PdfViewer(file = file)
                 }
             }
         }

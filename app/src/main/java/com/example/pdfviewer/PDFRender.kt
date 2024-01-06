@@ -2,7 +2,6 @@ package com.example.pdfviewer
 
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
-import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -28,8 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
@@ -38,19 +36,20 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.File
 import kotlin.math.sqrt
 
 @Composable
 fun PdfViewer(
     modifier: Modifier = Modifier,
-    uri: Uri,
+    file: File,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp)
 ) {
     val rendererScope = rememberCoroutineScope()
     val mutex = remember { Mutex() }
-    val renderer by produceState<PdfRenderer?>(null, uri) {
+    val renderer by produceState<PdfRenderer?>(null, file) {
         rendererScope.launch(Dispatchers.IO) {
-            val input = ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
+            val input = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
             value = PdfRenderer(input)
         }
         awaitDispose {
@@ -74,18 +73,18 @@ fun PdfViewer(
         ) {
             items(
                 count = pageCount,
-                key = { index -> "$uri-$index" }
+                key = { index -> "$file-$index" }
             ) { index ->
-                val cacheKey = MemoryCache.Key("$uri-$index")
+                val cacheKey = MemoryCache.Key("$file-$index")
                 val cacheValue : Bitmap? = imageLoader.memoryCache?.get(cacheKey)?.bitmap
 
                 var bitmap : Bitmap? by remember { mutableStateOf(cacheValue)}
                 if (bitmap == null) {
-                    DisposableEffect(uri, index) {
+                    DisposableEffect(file, index) {
                         val job = imageLoadingScope.launch(Dispatchers.IO) {
                             val destinationBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                             mutex.withLock {
-                                Log.d("PdfGenerator", "Loading PDF $uri - page $index/$pageCount")
+                                Log.d("PdfGenerator", "Loading PDF $file - page $index/$pageCount")
                                 if (!coroutineContext.isActive) return@launch
                                 try {
                                     renderer?.let {
@@ -120,7 +119,7 @@ fun PdfViewer(
                     Image(
                         modifier = Modifier.background(Color.White).aspectRatio(1f / sqrt(2f)).fillMaxWidth(),
                         contentScale = ContentScale.Fit,
-                        painter = rememberImagePainter(request),
+                        painter = rememberAsyncImagePainter(request),
                         contentDescription = "Page ${index + 1} of $pageCount"
                     )
                 }
