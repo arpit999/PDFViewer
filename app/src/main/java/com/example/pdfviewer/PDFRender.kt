@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -186,10 +187,12 @@ fun Render2(file: File) {
                 }
                 page.pageContent.collectAsState().value?.asImageBitmap()?.let {
                     Image(
+                        contentScale = ContentScale.FillBounds,
                         modifier = Modifier
                             .background(Color.White)
                             .aspectRatio(1f / sqrt(2f))
                             .fillMaxWidth()
+                            .clipToBounds()
                             .graphicsLayer {
                                 scaleX = page.scale.value
                                 scaleY = page.scale.value
@@ -224,7 +227,6 @@ fun Render2(file: File) {
                                     }
                                 }
                             },
-                        contentScale = ContentScale.FillBounds,
                         bitmap = it,
                         contentDescription = "Pdf page number: $index"
                     )
