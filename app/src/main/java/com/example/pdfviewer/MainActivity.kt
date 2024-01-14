@@ -6,11 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.pdfviewer.ui.theme.PDFViewerTheme
 import com.example.pdfviewer.utility.Utility
 
@@ -19,16 +17,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PDFViewerTheme {
-                val context = LocalContext.current
 
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val file = Utility.getFileFromAssets(context,"sample.pdf")
-//                    PdfViewer(uri = Uri.parse("https://www.africau.edu/images/default/sample.pdf"))
-                    PdfViewer(file = file)
+
+                    LoadPDFFromAsset()
+
+//                    LoadPDFinWebView()
+
                 }
             }
         }
@@ -37,17 +35,19 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun LoadPDFFromAsset() {
+    val context = LocalContext.current
+    val file = Utility.getFileFromAssets(context,"sample2.pdf")
+//    Render1(file = file)
+    Render2(file)
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    PDFViewerTheme {
-        Greeting("Android")
-    }
+fun LoadPDFinWebView() {
+    val url = "https://www.africau.edu/images/default/sample.pdf"
+//    val url = "https://medium.com/telepass-digital/how-to-show-a-pdf-with-jetpack-compose-74fc773adbd0"
+    /**
+     * Avoid using this method to display PDF as there is certain limit to `Google Drive` request that we can make.
+     */
+    WebViewScreen("https://docs.google.com/gview?embedded=true&url=$url")
 }
