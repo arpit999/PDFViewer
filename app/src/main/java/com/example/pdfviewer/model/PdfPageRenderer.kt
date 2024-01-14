@@ -5,7 +5,10 @@ import android.graphics.Bitmap.createBitmap
 import android.graphics.Canvas
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,7 +53,8 @@ internal class PdfRender(file: File) {
 
         var job: Job? = null
 
-        var scale = mutableStateOf(1f)
+        var scale by mutableStateOf(1f)
+        var offset by mutableStateOf(Offset(0f,0f))
 
         val dimension = pdfRenderer.openPage(index).use { currentPage ->
             Dimension(

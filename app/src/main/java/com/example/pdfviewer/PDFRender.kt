@@ -4,12 +4,15 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.forEachGesture
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -169,6 +172,7 @@ fun Render1(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Render2(file: File) {
     Box(
@@ -193,9 +197,18 @@ fun Render2(file: File) {
                             .aspectRatio(1f / sqrt(2f))
                             .fillMaxWidth()
                             .clipToBounds()
+                            .combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                                onDoubleClick = {
+                                    page.scale = if (page.scale > 1f) 1f
+                                    else 3f
+                                }
+                            )
                             .graphicsLayer {
-                                scaleX = page.scale.value
-                                scaleY = page.scale.value
+                                scaleX = page.scale
+                                scaleY = page.scale
                             }
                             .pointerInput(Unit) {
                                 forEachGesture {
@@ -208,12 +221,11 @@ fun Render2(file: File) {
                                             // Calculate gestures and consume pointerInputChange
                                             // only size of pointers down is 2
                                             if (event.changes.size == 2) {
-                                                var zoom = page.scale.value
+                                                var zoom = page.scale
                                                 zoom *= event.calculateZoom()
                                                 // Limit zoom between 100% and 300%
                                                 zoom = zoom.coerceIn(1f, 3f)
-                                                page.scale.value = zoom
-
+                                                page.scale = zoom
 
                                                 /*
                                                     Consumes position change if there is any
